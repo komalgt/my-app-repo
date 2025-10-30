@@ -24,6 +24,9 @@ pipeline {
         }
 
         stage('Build Lambda Artifact') {
-            steps {
-                sh 'mkdir -p build'
-                sh 'zip -r build/myfunction.zip lambda
+    steps {
+        sh 'mkdir -p build'
+        sh 'zip -r build/myfunction.zip lambda_function_code/lambda_function.py'
+        sh 'ls -lh build/'
+    }
+}
