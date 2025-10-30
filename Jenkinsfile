@@ -49,6 +49,8 @@ pipeline {
             steps {
                 deployLambda(
                     functionName: env.LAMBDA_FUNCTION_NAME,
+                    s3Bucket: env.S3_BUCKET,      // Ensure this is present and populated!
+                    s3Key: env.S3_KEY,            // Ensure this is present and populated!
                     artifactPath: env. ARTIFACT_PATH,
                     awsRegion: env.REGION,
                     awsCredentialsId: env.AWS_CREDENTIALS_ID
