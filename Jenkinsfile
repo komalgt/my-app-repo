@@ -24,9 +24,39 @@ pipeline {
         }
 
         stage('Build Lambda Artifact') {
-    steps {
-        sh 'mkdir -p build'
-        sh 'zip -r build/myfunction.zip lambda_function_code/lambda_function.py'
-        sh 'ls -lh build/'
-    }
-}
+            steps {
+                sh 'mkdir -p build'
+                sh 'zip -r build/myfunction.zip lambda_function_code/lambda_function.py'
+                sh 'ls -lh build/'
+            }
+        }
+
+        stage('Upload Lambda Artifact to S3') {
+            steps {
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${env.AWS_CREDENTIALS_ID}"]
+                ]) {
+                    sh '''
+                        ls -lh build/myfunction.zip
+                        aws s3 cp build/myfunction.zip s3://$S3_BUCKET/$S3_KEY --region $REGION
+                    '''
+                }
+            }
+        }
+
+        stage('Lambda Deploy (shared lib)') {
+            steps {
+                script {
+                    deployLambda(
+                        functionName: env.LAMBDA_FUNCTION_NAME,
+                        s3Bucket: env.S3_BUCKET,
+                        s3Key: env.S3_KEY,
+                        awsRegion: env.REGION,
+                        awsCredentialsId: env.AWS_CREDENTIALS_ID
+                    )
+                }
+            }
+        }
+
+        stage('Deploy to ECS (shared lib)') {
+            steps {
